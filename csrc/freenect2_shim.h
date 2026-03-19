@@ -12,8 +12,12 @@ typedef void *ListenerHandle;
 typedef struct {
   void *color_data;
   int color_width, color_height, color_bpp;
+  /** `libfreenect2::Frame::Format` for the color frame (e.g. BGRX = 4, RGBX = 5). */
+  int color_format;
   void *depth_data;
   int depth_width, depth_height, depth_bpp;
+  /** `libfreenect2::Frame::Format` for the depth frame (typically Float = 2). */
+  int depth_format;
 } FrameData;
 
 Freenect2Handle fn2_create(void);
@@ -29,7 +33,7 @@ ListenerHandle fn2_create_sync_listener(void);
 void fn2_destroy_listener(ListenerHandle listener);
 void fn2_set_listeners(DeviceHandle dev, ListenerHandle listener);
 
-/** Returns 1 on success, 0 on timeout. Populates *out with pointers valid until fn2_release_frame. */
+/** Returns 1 on success, 0 on timeout or incomplete color/depth pair. */
 int fn2_wait_for_frame(ListenerHandle listener, FrameData *out, int timeout_ms);
 void fn2_release_frame(ListenerHandle listener, FrameData *out);
 

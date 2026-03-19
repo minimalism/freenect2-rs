@@ -132,10 +132,12 @@ extern "C" int fn2_wait_for_frame(ListenerHandle listener, FrameData *out,
   out->color_width = static_cast<int>(color->width);
   out->color_height = static_cast<int>(color->height);
   out->color_bpp = static_cast<int>(color->bytes_per_pixel);
+  out->color_format = static_cast<int>(color->format);
   out->depth_data = depth->data;
   out->depth_width = static_cast<int>(depth->width);
   out->depth_height = static_cast<int>(depth->height);
   out->depth_bpp = static_cast<int>(depth->bytes_per_pixel);
+  out->depth_format = static_cast<int>(depth->format);
   return 1;
 }
 
