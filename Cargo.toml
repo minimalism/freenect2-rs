@@ -1,5 +1,10 @@
 [package]
 name = "freenect2-rs"
+description = "Safe Rust bindings for libfreenect2 (Kinect v2)"
+license = "Apache-2.0"
+repository = "https://github.com/minimalism/freenect2-rs"
+keywords = ["kinect", "freenect2", "depth", "rgb", "usb"]
+categories = ["hardware-support", "external-ffi-bindings"]
 version = "0.1.0"
 edition = "2024"
 
