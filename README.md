@@ -45,3 +45,24 @@ FREENECT2_LIB_DIR=$HOME/Dev/libfreenect2/build/lib \
 LD_LIBRARY_PATH=$FREENECT2_LIB_DIR \
 cargo test
 ```
+
+## Troubleshooting
+
+`[Error] [Freenect2Impl] failed to open Kinect v2: @2:3 LIBUSB_ERROR_ACCESS Access denied (insufficient permissions)`
+
+You need a udev rule that grants your user permission to access the Kinect's USB device.
+libfreenect2 actually ships these rules. Run:
+
+```
+sudo cp $HOME/Dev/libfreenect2/platform/linux/udev/90-kinect2.rules /etc/udev/rules.d/  # Or wherever you have libfreenect2 
+sudo udevadm control --reload-rules
+sudo udevadm trigger
+```
+
+Then unplug and replug the Kinect. udev rules only apply at connection time.
+Verify that this works with:
+```
+lsusb | grep -i microsoft   # find the Kinect
+# should show something like: Bus 002 Device 003: ID 045e:02c4 Microsoft Corp.
+```
+
