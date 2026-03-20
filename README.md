@@ -12,11 +12,11 @@ Rust bindings for [libfreenect2](https://github.com/OpenKinect/libfreenect2) (Ki
 
 ## Usage
 
-Add the dependency (this crate is not necessarily published on crates.io yet):
+Add the dependency from [crates.io](https://crates.io/crates/freenect2-rs):
 
 ```toml
 [dependencies]
-freenect2-rs = { path = "../freenect2-rs" }
+freenect2-rs = "0.1"
 ```
 
 Minimal capture loop:
