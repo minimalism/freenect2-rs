@@ -11,5 +11,6 @@ edition = "2024"
 [dependencies]
 
 [build-dependencies]
-bindgen = "0.71"
 cc = "1.2"
+bindgen = "0.71"
+pkg-config = "0.3"

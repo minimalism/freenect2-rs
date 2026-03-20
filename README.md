@@ -1,11 +1,12 @@
 # freenect2-rs
 
-Rust bindings for [libfreenect2](https://github.com/OpenKinect/libfreenect2) (Kinect for Windows v2 / Kinect v2). The crate links against a **system-built** `libfreenect2` and a small C++ shim that exposes a C ABI.
+Rust bindings for [libfreenect2](https://github.com/OpenKinect/libfreenect2) (Kinect for Windows v2 / Kinect v2). The crate links against a **system-installed** `libfreenect2` and a small C++ shim that exposes a C ABI.
 
 ## Requirements
 
 - **Hardware:** Kinect v2 and a working USB 3.0 setup (see [upstream docs](https://github.com/OpenKinect/libfreenect2)).
-- **Library:** Build and install (or build-only) libfreenect2 so you have `libfreenect2.so` and matching headers. This repo vendors headers under `vendor/include/libfreenect2` for the shim; the **shared library** still comes from your build.
+- **Library:** Install libfreenect2 with CMake (`cmake --install` or `make install`) so `libfreenect2.so` is on the system library path. Run **`sudo ldconfig`** after install if needed, then confirm with e.g. **`ldconfig -p | grep freenect2`**.
+- **Headers:** This repo vendors headers under `vendor/include/libfreenect2` for building the shim; they should match the installed library version when possible.
 - **Build:** C++ toolchain, `libclang` for [bindgen](https://rust-lang.github.io/rust-bindgen/) (e.g. Debian/Ubuntu: `libclang-dev`).
 - **Runtime:** libusb and other dependencies your libfreenect2 build expects (e.g. `libusb-1.0-0`).
 
@@ -63,28 +64,21 @@ freenect2-rs/
 
 ## Build
 
-`build.rs` **must** find `libfreenect2.so` at link time via **`FREENECT2_LIB_DIR`** (directory containing the `.so`, e.g. `$HOME/Dev/libfreenect2/build/lib`). There is no default; unset → build script panic with a short message.
-
-At **runtime**, the dynamic linker must resolve `libfreenect2.so` (and its dependencies). Usually set:
-
-```bash
-export FREENECT2_LIB_DIR=/path/to/libfreenect2/build/lib
-export LD_LIBRARY_PATH="$FREENECT2_LIB_DIR${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
-```
-
-Then:
+With libfreenect2 installed and visible to the **linker** and **dynamic loader** (standard paths + `ldconfig`), no extra environment variables are required:
 
 ```bash
 cargo build
 cargo test
 ```
 
+If the linker cannot find `-lfreenect2`, check that the install prefix’s `lib` directory is configured (e.g. `/usr/local/lib` in `/etc/ld.so.conf` or `ld.so.conf.d/`, then `sudo ldconfig`).
+
 ### Tests
 
 - **`test_create_destroy`** — Linkage smoke test (no device).
-- **`test_capture_frame`** — Full open + one frame; **`#[ignore]`** by default (needs hardware). Run with:
+- **`test_capture_frame`** — Full open + one frame; **`#[ignore]`** by default (needs hardware):
   ```bash
-  FREENECT2_LIB_DIR=... LD_LIBRARY_PATH=... cargo test test_capture_frame -- --ignored
+  cargo test test_capture_frame -- --ignored
   ```
 
 ## Troubleshooting
@@ -112,9 +106,10 @@ lsusb | grep -i microsoft
 
 Install LLVM/Clang dev packages and, if needed, set **`LIBCLANG_PATH`** to the directory containing `libclang.so` (see [bindgen docs](https://rust-lang.github.io/rust-bindgen/requirements.html)).
 
-### Runtime: `error while loading shared libraries: libfreenect2.so`
+### Link or load errors for `libfreenect2`
 
-Set **`LD_LIBRARY_PATH`** to the directory that contains `libfreenect2.so` (often the same as `FREENECT2_LIB_DIR`).
+- **Link time:** Ensure the library is installed under a directory the linker searches, or extend `LIBRARY_PATH` / toolchain defaults for your platform.
+- **Run time:** Ensure the dynamic loader can find the `.so` (same as above; **`ldconfig -p | grep freenect2`** is a good check on Linux).
 
 ## Upstream licensing
 

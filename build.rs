@@ -4,23 +4,21 @@ use std::path::PathBuf;
 fn main() {
     let manifest_dir = PathBuf::from(env::var("CARGO_MANIFEST_DIR").unwrap());
 
-    cc::Build::new()
-        .cpp(true)
+    let lib = pkg_config::Config::new()
+        .atleast_version("0.2")
+        .probe("freenect2")
+        .expect("freenect2 not found via pkg-config; is it installed to /usr/local?");
+
+    let mut build = cc::Build::new();
+    build.cpp(true)
         .flag_if_supported("-std=c++11")
         .file(manifest_dir.join("csrc/freenect2_shim.cpp"))
         .include(manifest_dir.join("vendor/include"))
-        .include(manifest_dir.join("csrc"))
-        .compile("freenect2_shim");
-
-    let lib_dir = env::var("FREENECT2_LIB_DIR").unwrap_or_else(|_| {
-        panic!(
-            "FREENECT2_LIB_DIR must be set to the directory containing libfreenect2.so \
-             (e.g. the `lib` folder under your libfreenect2 build tree)"
-        )
-    });
-    println!("cargo:rerun-if-env-changed=FREENECT2_LIB_DIR");
-    println!("cargo:rustc-link-search=native={lib_dir}");
-    println!("cargo:rustc-link-lib=freenect2");
+        .include(manifest_dir.join("csrc"));
+    for path in &lib.include_paths {
+        build.include(path);
+    }
+    build.compile("freenect2_shim");
 
     let out_path = PathBuf::from(env::var("OUT_DIR").unwrap()).join("bindings.rs");
     bindgen::Builder::default()
